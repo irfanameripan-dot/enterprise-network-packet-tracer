@@ -1,0 +1,101 @@
+R2#sh run
+Building configuration...
+
+Current configuration : 1304 bytes
+!
+version 16.6.4
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname R2
+!
+!
+!
+!
+ip dhcp excluded-address 10.20.10.1 10.20.10.10
+!
+ip dhcp pool BRANCH
+ network 10.20.10.0 255.255.255.0
+ default-router 10.20.10.1
+ dns-server 10.10.99.21
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0/0
+ description To R-ISP
+ ip address 172.16.12.2 255.255.255.252
+ ip nat outside
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0/1
+ description Branch LAN
+ ip address 10.20.10.1 255.255.255.0
+ ip nat inside
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0/2
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+router ospf 1
+ router-id 2.2.2.2
+ log-adjacency-changes
+ passive-interface GigabitEthernet0/0/1
+ network 10.20.10.0 0.0.0.255 area 0
+ network 172.16.12.0 0.0.0.3 area 0
+!
+ip nat inside source list NAT-LIST interface GigabitEthernet0/0/0 overload
+ip classless
+ip route 0.0.0.0 0.0.0.0 172.16.12.1 
+!
+ip flow-export version 9
+!
+!
+ip access-list extended NAT-LIST
+ deny ip 10.20.10.0 0.0.0.255 10.10.0.0 0.0.255.255
+ permit ip 10.20.10.0 0.0.0.255 any
+!
+!
+!
+!
+!
+line con 0
+!
+line aux 0
+!
+line vty 0 4
+ login
+!
+!
+!
+end
